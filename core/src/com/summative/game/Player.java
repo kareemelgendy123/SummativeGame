@@ -3,39 +3,54 @@ package com.summative.game;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+
+/**
+ *
+ * @author Kareem
+ * @author Arvind
+ */
 
 public class Player extends ApplicationAdapter {
 
     // Instance variables
     // Sprite batch
     private SpriteBatch batch;
+    
     // Player image - spaceship
     private Texture spaceship;
-    
+
     // Location of the player
-    private float x;
-    private float y;
+    float x;
+    float y;
     
     // Displacement of the player
     private float dx;
 
     // Player 
-    public Player() {
+    public Player(float x, float y) {
         this.x = 375;
         this.y = 25;
         
         // Displacement of X 
         // Moving the character left and right
         this.dx = 0;
-        
-        // The sapceship
+
+        // The spaceship
         spaceship = new Texture("spaceship.png");  
     }
- 
+    
+    // Getting the x coordinate
+    public float getX(){
+        return x;
+    }
+    
+    // Getting the y coordinate
+    public float getY(){
+        return y;
+    }
+    
     public void update(float deltaTime) {
         // Player movement
         // If the right key is pressed

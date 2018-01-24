@@ -1,35 +1,39 @@
 package com.summative.game;
 
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
+/**
+ *
+ * @author Kareem
+ * @author Arvind
+ */
+
 public class MainGame implements Screen{
 
-    // Instance variables
+    // Sound
+
     
+// Instance variables
     // we want to keep track of the game manager
     // this way we could make methods to switch screens!
-    private Platform gameManager;
+    private final Asteroids gameManager;
     
     // The player
-    private Player player;
+    private final Player player;
     
     // The world 
-    private World world;    
+    private final World world;    
     
     // Sprite Batch
-    private SpriteBatch batch;
+    SpriteBatch batch;
     
     // View Port
-    private Viewport view;
+    private final Viewport view;
 
     // Game Units
     private final int HEIGHT = 600;
@@ -37,12 +41,12 @@ public class MainGame implements Screen{
     
     // the constructor for our maingame needs to know what made it
     // this is what the game variable is
-    public MainGame(Platform game){
+    public MainGame(Asteroids game){
         // we save this so we can talk to it later
         this.gameManager = game;
         
         // Creating the player
-        player = new Player();
+        player = new Player(375, 25);
         
         // Generating the world
         world = new World();
@@ -53,6 +57,15 @@ public class MainGame implements Screen{
         // viewport
         this.view = new FitViewport(WIDTH, HEIGHT);
         view.apply();
+        
+        // Calling the music file - background music
+        Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("backgroundMusic.mp3"));
+        
+        // Looping the background music
+        backgroundMusic.setLooping(true);
+        
+        // Playing the background music
+        backgroundMusic.play();
     }
   
     @Override
@@ -62,28 +75,28 @@ public class MainGame implements Screen{
     }
 
     // the main game loop for this screen
+    @Override
     public void render(float deltaTime) {
         
         // Updating the player
         player.update(deltaTime);
-        
-        // clears the screen in a black colour
-        Gdx.gl.glClearColor(0, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // ask the SpriteBatch to start taking notes of what to draw
+        // Asking the SpriteBatch to start taking notes of what to draw
         batch.begin();
         
-        // Rendering the world and player
+        // Rendering
+        // Rendering the world
         world.render(batch);
+        
+        // Rendering the player
         player.render(batch);
 
-        // tell the SpriteBatch we are good to draw everything now
+        // Tell the SpriteBatch that we're good
+        // Draw everything
 	batch.end();
         
         // Updating the world
         world.update(deltaTime);
-
     }
 
     // if the game could pause, what do you need to happen?
@@ -109,8 +122,6 @@ public class MainGame implements Screen{
     public void dispose() {
         
     }
-
- 
 
     @Override
     public void resize(int width, int height) {
