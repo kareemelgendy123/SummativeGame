@@ -5,9 +5,14 @@
  */
 package com.summative.game;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
 
 /**
  *
@@ -24,9 +29,6 @@ public class World {
     private final Texture asteroid;
     private BitmapFont font;
     
-    // The player
-    private final Player player;
-    
     // Background Images
     private final float backgroundX; // X Coordinate of the backgrounds
     private float backgroundY; 
@@ -38,7 +40,7 @@ public class World {
     float[] asteroidY = new float[18];
 
     // Displacement of the background
-    private final float backgroundDY;
+    private float backgroundDY;
     
     // Displacement of the asteroids
     private double asteroidDY;
@@ -51,13 +53,30 @@ public class World {
     
     // Points
     private int points;
-
+    
+    private Rectangle[] asteroidRect;
+    private Rectangle playerRect;
+     
+    // Player image - spaceship
+    private Texture spaceship;
+    
+    // Location of the player
+    private float playerX;
+    private float playerY;
+    
+    // Displacement of the player
+    private float playerDX;
+    
+    private Texture title;
+    private Texture playButton; // Game
+    private Texture quitButton; // Quit
+    
     // Constructor
     public World() {
+                
+        playerRect = new Rectangle();
+        asteroidRect = new Rectangle[18];
         
-        // Creating new player
-        player = new Player(375, 25);
-
         // Coordinates of the background images
         // X Coordinates       
         this.backgroundX = 0;
@@ -74,16 +93,28 @@ public class World {
         // Player points
         this.points = 0;
         
-        // Game status
-        this.status = status;
+        this.playerX = 375;
+        this.playerY = 25;
+        
+        // Displacement of X 
+        // Moving the character left and right
+        this.playerDX = 0;
+
+        // The spaceship
+        spaceship = new Texture("spaceship.png");  
+        
+        title = new Texture("title.png");
+        playButton = new Texture("play.png");
+        quitButton = new Texture("quit.png");
         
         // Collision status
-        this.collided = collided;
+        this.collided = false;
 
         // Getting the images
         background = new Texture("background.png"); // Background
         asteroid = new Texture("asteroid.png"); // Asteroid
-
+        
+        
         // Generating coordinates for the array of asteroids
         for (int i = 0; i < asteroidX.length; i++) {
             // Randomly generating x coordinates for the variables
@@ -94,20 +125,44 @@ public class World {
         }
     }
     
+    // Collision Detection
+    public boolean checkCollision(){
+        
+        // Loooping through the asteroids
+        for(int i = 0; i < asteroidY.length; i++){
+
+            // Player Rectangle
+            // playerRect = new Rectangle(player.getX(), player.getY(), 50, 48);
+            
+            // Asteroid Rectangle
+            asteroidRect[i] = new Rectangle(asteroidX[i], asteroidY[i], 55, 55);
+            playerRect = new Rectangle(playerX, playerY, 50, 50);
+            
+                    //shape.begin(ShapeRenderer.ShapeType.Line);
+                    //shape.rect(player.getX(), player.getY(), 50, 50); // Play
+                    //shape.rect(asteroidX[i], asteroidY[i], 60, 60); // quit
+                    //shape.end();
+            
+            // If the collide
+            if (asteroidRect[i].overlaps(playerRect)){
+                collided = true;
+            }
+            
+            // Restarting the for loop once it reaches the end of the array
+            if (i == asteroidY.length){
+                i = 0;
+            } 
+        }
+        return collided;
+    }
+    
     // Update
     public void update(float deltaTime) {
-        
-        this.status = true;
-        this.collided = false;
-
-        // If status is true then
-        if (status) {
-
+                
             // Moving the background down by the assigned displacement
             this.backgroundY += backgroundDY;
             this.backgroundY2 += backgroundDY;
             this.backgroundY3 += backgroundDY;
-            
             
             // Looping through the backgrounds
             // Looping the first background image
@@ -122,30 +177,67 @@ public class World {
             } else if (this.backgroundY3 <= -450) {
                 this.backgroundY3 = 900;
             }
+            
+        ///////////////////
+            
+        // Player movement
+        // If the right key is pressed
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            // Move right
+            this.playerDX = 8;
+            
+        // If the left key is pressed
+        } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            // Move left
+            this.playerDX = -8;
+        
+        // If no keys are pressed
+        }else{
+            // Stand still
+            this.playerDX = 0;
+        }
+        
+        // Moving the player
+        this.playerX += this.playerDX;
+        
+        // Boundaries
+        // Left side of the screen
+        if (this.playerX <= 25){
+            this.playerX = 25;
+        }
+        
+        // Right side of the screen
+        if (this.playerX > 710){
+            this.playerX = 710;
+        }
+            
+            ///////////////////
 
+            checkCollision();
+            
             // Looping through the asteroids
             for (int i = 0; i < asteroidY.length; i++) {
+
                 // Making the asteroids fall
-                asteroidY[i] += asteroidDY; 
-                // Checking for collisions
-//                checkCollisions();
+                asteroidY[i] += asteroidDY;
 
                 // Restart the for loop
                 if (i == asteroidY.length) {
                     // Resetting the i value
                     i = 0;
                 }
+                                    
+                if (collided){
+                    backgroundDY = 0;
+                    asteroidDY = 0;
+                    playerDX = 0;
+                    playerX = 900;
+                }
+            }
 
-            }
             // Increasing the speed of the asteroids
-            asteroidDY = asteroidDY - 0.0031;
-            
-            // If collided
-            if (collided = true){
-                // Game status 
-                status = false;
-            }
-        }  
+            asteroidDY -= 0.0031; 
+        
     }
 
     public void render(SpriteBatch batch) {
@@ -153,6 +245,8 @@ public class World {
         batch.draw(background, backgroundX, backgroundY);
         batch.draw(background, backgroundX, backgroundY2);
         batch.draw(background, backgroundX, backgroundY3);
+        
+        BitmapFont font = new BitmapFont();
 
         // Drawing the array of asteroids
         for (int i = 0; i < asteroidY.length; i++) {
@@ -169,8 +263,18 @@ public class World {
             if (i == asteroidX.length) {
                 i = 0;
             }
+            
+            if (collided){              
+                    Gdx.gl.glClearColor(0, 0, 0, 1);
+                    Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+                    
+                    font.draw(batch, "ur score is " + points, 365, 300);
+            }
         }
-        BitmapFont font = new BitmapFont();
+        
+        // Draws the player
+        batch.draw(spaceship, playerX, playerY);
+        
         font.draw(batch, "" + points, 25, 575);
     }
 }
