@@ -13,7 +13,7 @@ public class DesktopLauncher {
                 config.title = "Asteroids";
                 config.width = 800;
                 config.height = 600;
-                
+                                
 		new LwjglApplication(new Asteroids(), config);
 	}
 }
